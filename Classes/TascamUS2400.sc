@@ -1,4 +1,4 @@
-US2400 {
+TascamUS2400 {
 	var slots;
 	var page;
 

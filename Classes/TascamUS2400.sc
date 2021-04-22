@@ -1,6 +1,7 @@
 TascamUS2400 {
 	var <device;
 	var <listenFuncs, <syncFuncs; //TEMP getter
+	var <controlDescriptions;
 
 	//This class expects the Tascam US-2400 to run in a 'transparent' mode.
 	//To set the device to this mode hold the master 'SEL' and 'CHAN' keys pressed,
@@ -13,6 +14,7 @@ TascamUS2400 {
 
 	init{|deviceName, portName|
 		device = MIDIDevice(deviceName, portName, deviceName, portName, "US-2400");
+		controlDescriptions = VTMOrderedIdentityDictionary.new;
 		this.initMappings;
 	}
 
@@ -69,6 +71,9 @@ TascamUS2400 {
 			);
 			comp = device.components[compName];
 			comp.addUniqueMethod(\setFader, makeFaderSyncFunction.value(comp));
+			controlDescriptions.put(compName, (
+				minVal: 0, maxVal: 16368, type: \integer, clipmode: \both, defaultValue: 0
+			));
 
 			//encoder
 			compName = "slot_%_encoder_%".format(slotNum, stripeNum).asSymbol; 
@@ -78,6 +83,9 @@ TascamUS2400 {
 			);
 			comp = device.components[compName];
 			comp.addUniqueMethod(\setEncoderRing, makeEncoderSyncFunction.value(comp));
+			controlDescriptions.put(compName, (
+				minVal: 0, maxVal: 1023, type: \integer, clipmode: \both, defaultValue: 0
+			));
 
 			//buttons
 			[\faderTouch, \select, \solo, \mute].do({|buttonType, j|
@@ -89,6 +97,10 @@ TascamUS2400 {
 				);
 				comp = device.components[compName];
 				comp.addUniqueMethod('setLED', makeButtonSyncFunction.value(comp));
+				controlDescriptions.put(compName, (
+					minVal: 0, maxVal: 1, type: \integer, clipmode: \both, defaultValue: 0,
+					enum: [\released, \pressed]
+				));
 			});
 		});
 		//master section mappings
@@ -102,6 +114,9 @@ TascamUS2400 {
 			device.components['master_fader'].addUniqueMethod(
 				\setFader, makeFaderSyncFunction.value()
 			);
+			controlDescriptions.put('master_fader', (
+				minVal: 0, maxVal: 16368, type: \integer, clipmode: \both, defaultValue: 0
+			));
 			//master fader touch
 			device.addComponent( compName: 'master_faderTouch', chan: 2, number: 0);
 			device.components['master_faderTouch'].addUniqueMethod(
@@ -139,6 +154,10 @@ TascamUS2400 {
 					compName: compName, chan: item[\chan], number: item[\ctrlNum]
 				);
 				device.components[compName].addUniqueMethod(\setLED, makeButtonSyncFunction.value());
+				controlDescriptions.put(compName, (
+					minVal: 0, maxVal: 1, type: \integer, clipmode: \both, defaultValue: 0,
+					enum: [\released, \pressed]
+				));
 			});
 
 			device.addComponent(
@@ -148,7 +167,10 @@ TascamUS2400 {
 			device.addComponent( compName: 'master_joystick_x', chan: 14, number: 90);
 			device.addComponent( compName: 'master_joystick_y', chan: 14, number: 91);
 		}.value;
-
-
-		}
 	}
+
+	free{
+		device.free;
+	}
+}
+

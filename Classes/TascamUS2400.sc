@@ -72,6 +72,7 @@ TascamUS2400 {
 			comp = device.components[compName];
 			comp.addUniqueMethod(\setFader, makeFaderSyncFunction.value(comp));
 			controlDescriptions.put(compName, (
+				mode: \attribute,
 				minVal: 0, maxVal: 16368, type: \integer, clipmode: \both, defaultValue: 0
 			));
 
@@ -83,7 +84,11 @@ TascamUS2400 {
 			);
 			comp = device.components[compName];
 			comp.addUniqueMethod(\setEncoderRing, makeEncoderSyncFunction.value(comp));
+			comp.syncFunction = {|c|
+				c.setEncoderRing(c.value, centerPoint: c.value == 0);
+			};
 			controlDescriptions.put(compName, (
+				mode: \attribute,
 				minVal: 0, maxVal: 1023, type: \integer, clipmode: \both, defaultValue: 0
 			));
 
@@ -91,17 +96,25 @@ TascamUS2400 {
 			[\faderTouch, \select, \solo, \mute].do({|buttonType, j|
 				var ctrlNum = (i * 4) + j;
 				var comp;
-				compName = "slot_%_%_%".format(slotNum, buttonType, stripeNum).asSymbol; 
+				compName = "slot_%_%_%".format(
+					slotNum, buttonType, stripeNum
+				).asSymbol; 
 				device.addComponent(
 					compName: compName, chan: 1, number: ctrlNum
 				);
 				comp = device.components[compName];
 				comp.addUniqueMethod('setLED', makeButtonSyncFunction.value(comp));
-				controlDescriptions.put(compName, (
-					minVal: 0, maxVal: 1, type: \integer, clipmode: \both, defaultValue: 0,
-					enum: [\released, \pressed]
+				controlDescriptions.put("%_LED".format(compName).asSymbol, (
+					mode: \attribute, type: \boolean, defaultValue: false,
+					action: {|c|
+						"Button LED action '%' value: '%'".format(compName, c.value).postln;
+						comp.setLED(c.value);
+					}
 				));
-			});
+				controlDescriptions.put(compName,
+						( mode: \signal, type: \string, enum: [\pressed, \released], restrictToEnum: true)
+					);
+				});
 		});
 		//master section mappings
 		{

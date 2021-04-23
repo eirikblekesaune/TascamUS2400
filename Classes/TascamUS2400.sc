@@ -163,14 +163,22 @@ TascamUS2400 {
 				(name: \record, chan: 1, ctrlNum: 121)
 			].do({|item|
 				var compName = "master_%".format(item[\name]).asSymbol;
+				var comp;
 				device.addComponent(
 					compName: compName, chan: item[\chan], number: item[\ctrlNum]
 				);
-				device.components[compName].addUniqueMethod(\setLED, makeButtonSyncFunction.value());
-				controlDescriptions.put(compName, (
-					minVal: 0, maxVal: 1, type: \integer, clipmode: \both, defaultValue: 0,
-					enum: [\released, \pressed]
+				comp = device.components[compName];
+				comp.addUniqueMethod(\setLED, makeButtonSyncFunction.value());
+				controlDescriptions.put("%_LED".format(compName).asSymbol, (
+					mode: \attribute, type: \boolean, defaultValue: false,
+					action: {|c|
+						"Button LED action '%' value: '%'".format(compName, c.value).postln;
+						comp.setLED(c.value);
+					}
 				));
+				controlDescriptions.put(compName,
+						( mode: \signal, type: \string, enum: [\pressed, \released], restrictToEnum: true)
+					);
 			});
 
 			device.addComponent(

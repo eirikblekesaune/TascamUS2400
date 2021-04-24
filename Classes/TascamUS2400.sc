@@ -114,7 +114,12 @@ TascamUS2400 {
 					}
 				));
 				controlDescriptions.put(compName,
-						( mode: \signal, type: \string, enum: [\pressed, \released], restrictToEnum: true)
+						( 
+							mode: \signal,
+							type: \integer,
+							minVal: 0, maxVal: 1,
+							enum: [\pressed, \released],
+						)
 					);
 				});
 		});
@@ -179,7 +184,12 @@ TascamUS2400 {
 					}
 				));
 				controlDescriptions.put(compName,
-						( mode: \signal, type: \string, enum: [\pressed, \released], restrictToEnum: true)
+						( 
+							mode: \signal,
+							type: \integer,
+							minVal: 0, maxVal: 1,
+							enum: [\pressed, \released],
+						)
 					);
 			});
 

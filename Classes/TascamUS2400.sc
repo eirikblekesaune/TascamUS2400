@@ -23,7 +23,9 @@ TascamUS2400 {
 		var makeEncoderSyncFunction;
 		var makeButtonSyncFunction;
 		makeFaderSyncFunction = {|comp|
-			{|cc, vv| cc.value_(vv).refresh;};
+			{|cc, vv| 
+				cc.value_(vv).refresh;
+			};
 		};
 		makeEncoderSyncFunction = {|comp|
 			{| comp, val, mode = \dot, centerPoint = false|
